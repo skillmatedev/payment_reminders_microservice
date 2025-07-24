@@ -3,19 +3,68 @@ import { IWorkshopBooking, WorkshopBooking } from "../models/WorkshopBooking";
 import logger from "../config/logger";
 import { Types } from "mongoose";
 import ReminderLog from "../models/ReminderLog";
+import { sendMail } from "../utils/mailer";
 
 // Mock message service functions
-function payment_reminder_message_for_five_days(booking: any) {
+async function payment_reminder_message_for_five_days(booking: any) {
   logger.info(`5 Days Reminder sent for booking ${booking._id}`);
+  if (booking.userEmail) {
+    try {
+      await sendMail({
+        to: booking.userEmail,
+        subject: "Payment Reminder: 5 Days",
+        text: `This is a 5-day payment reminder for your booking ${booking._id}.`,
+      });
+      logger.info(`5 Days Reminder email sent to ${booking.userEmail}`);
+    } catch (err) {
+      logger.error(`Failed to send 5 Days Reminder email: ${err}`);
+    }
+  }
 }
-function payment_reminder_message_for_three_days(booking: any) {
+async function payment_reminder_message_for_three_days(booking: any) {
   logger.info(`3 Days Reminder sent for booking ${booking._id}`);
+  if (booking.userEmail) {
+    try {
+      await sendMail({
+        to: booking.userEmail,
+        subject: "Payment Reminder: 3 Days",
+        text: `This is a 3-day payment reminder for your booking ${booking._id}.`,
+      });
+      logger.info(`3 Days Reminder email sent to ${booking.userEmail}`);
+    } catch (err) {
+      logger.error(`Failed to send 3 Days Reminder email: ${err}`);
+    }
+  }
 }
-function payment_reminder_message_for_24_hr(booking: any) {
+async function payment_reminder_message_for_24_hr(booking: any) {
   logger.info(`24 Hours Reminder sent for booking ${booking._id}`);
+  if (booking.userEmail) {
+    try {
+      await sendMail({
+        to: booking.userEmail,
+        subject: "Payment Reminder: 24 Hours",
+        text: `This is a 24-hour payment reminder for your booking ${booking._id}.`,
+      });
+      logger.info(`24 Hours Reminder email sent to ${booking.userEmail}`);
+    } catch (err) {
+      logger.error(`Failed to send 24 Hours Reminder email: ${err}`);
+    }
+  }
 }
-function payment_reminder_message_for_30_mins(booking: any) {
+async function payment_reminder_message_for_30_mins(booking: any) {
   logger.info(`30 Minutes Reminder sent for booking ${booking._id}`);
+  if (booking.userEmail) {
+    try {
+      await sendMail({
+        to: booking.userEmail,
+        subject: "Payment Reminder: 30 Minutes",
+        text: `This is a 30-minute payment reminder for your booking ${booking._id}.`,
+      });
+      logger.info(`30 Minutes Reminder email sent to ${booking.userEmail}`);
+    } catch (err) {
+      logger.error(`Failed to send 30 Minutes Reminder email: ${err}`);
+    }
+  }
 }
 
 /**
@@ -81,7 +130,7 @@ export async function runReminderJob() {
     ) {
       const key = "5days";
       if (!(await alreadySent(booking._id as Types.ObjectId, key))) {
-        payment_reminder_message_for_five_days(booking);
+        await payment_reminder_message_for_five_days(booking);
         await logSent(booking._id as Types.ObjectId, key);
       }
     }
@@ -95,7 +144,7 @@ export async function runReminderJob() {
     ) {
       const key = "3days";
       if (!(await alreadySent(booking._id as Types.ObjectId, key))) {
-        payment_reminder_message_for_three_days(booking);
+        await payment_reminder_message_for_three_days(booking);
         await logSent(booking._id as Types.ObjectId, key);
       }
     }
@@ -105,7 +154,7 @@ export async function runReminderJob() {
     ) {
       const key = "24hr";
       if (!(await alreadySent(booking._id as Types.ObjectId, key))) {
-        payment_reminder_message_for_24_hr(booking);
+        await payment_reminder_message_for_24_hr(booking);
         await logSent(booking._id as Types.ObjectId, key);
       }
     }
@@ -113,7 +162,7 @@ export async function runReminderJob() {
     if (isWithinTolerance(now, updatedAt + 30 * 60 * 1000, 5 * 60 * 1000)) {
       const key = "30min";
       if (!(await alreadySent(booking._id as Types.ObjectId, key))) {
-        payment_reminder_message_for_30_mins(booking);
+        await payment_reminder_message_for_30_mins(booking);
         await logSent(booking._id as Types.ObjectId, key);
       }
     }

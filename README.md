@@ -32,6 +32,13 @@ This microservice automates payment reminders for workshop bookings using a sche
    MONGODB_URI=mongodb://localhost:27017/payment_reminders
    PORT=3000
    CRON_SCHEDULE=*/10 * * * *
+   # SMTP config for nodemailer
+   SMTP_HOST=smtp.example.com
+   SMTP_PORT=587
+   SMTP_SECURE=false
+   SMTP_USER=your_smtp_user
+   SMTP_PASS=your_smtp_password
+   SMTP_FROM=your_from_email@example.com
    ```
    Adjust values as needed.
 4. **Run the service:**
