@@ -1,0 +1,10 @@
+export enum SERVICE_TYPE {
+  CALL = 1,
+  WEBINAR = 2,
+  PACKAGE = 3,
+  DM = 4,
+  PRODUCTS,
+  WITHDRAW,
+  WORKSHOP,
+  NONE,
+}

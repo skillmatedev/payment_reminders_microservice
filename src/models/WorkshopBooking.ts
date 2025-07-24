@@ -1,31 +1,74 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
-export interface IWorkshopBooking extends Document {
-  workshop: mongoose.Types.ObjectId;
-  status: "upcoming" | "payment_pending" | "completed" | "cancelled";
-  updatedAt: Date;
-  userId: mongoose.Types.ObjectId;
-  amountDue: number;
-  // Add other fields as needed
+import { BookingStatus, SERVICE_TYPE } from "../constants";
+
+export interface IWorkshopBooking {
+  workshopBookingId?: string;
+  workshopId: Schema.Types.ObjectId;
+
+  name: string;
+  email: string;
+  phoneNumber: string;
+  profession?: string;
+
+  date: string;
+  time: string;
+
+  type: SERVICE_TYPE;
+
+  payment_gateway: string | null;
+  status: BookingStatus;
+
+  joinedWhatsAppViaLink: "yes" | "no";
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-const WorkshopBookingSchema = new Schema<IWorkshopBooking>(
+const WorkshopBookingSchema = new Schema<IWorkshopBooking & Document>(
   {
-    workshop: { type: Schema.Types.ObjectId, ref: "Workshop", required: true },
+    workshopBookingId: { type: String, unique: true },
+    workshopId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Workshop",
+    },
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    phoneNumber: { type: String, required: true },
+    profession: { type: String, default: "student" },
     status: {
       type: String,
-      enum: ["upcoming", "payment_pending", "completed", "cancelled"],
-      required: true,
+      required: true, // return only number from the enum
+      enum: Object.values(BookingStatus),
     },
-    updatedAt: { type: Date, required: true, default: Date.now },
-    userId: { type: Schema.Types.ObjectId, required: true },
-    amountDue: { type: Number, required: true },
-    // Add other fields as needed
+    type: {
+      type: Number,
+      required: false,
+      enum: Object.values(SERVICE_TYPE).filter(
+        (value) => typeof value === "number"
+      ),
+      default: SERVICE_TYPE.WORKSHOP, // which is 7
+    },
+    payment_gateway: { type: String, required: false, default: null },
+    joinedWhatsAppViaLink: { type: String, default: "no" },
+    date: { type: String, required: true },
+    time: { type: String, required: true },
   },
   { timestamps: true }
 );
 
-export default mongoose.model<IWorkshopBooking>(
-  "WorkshopBooking",
-  WorkshopBookingSchema
-);
+// ✅ Auto-increment _id and workshopBookingId using Counter
+WorkshopBookingSchema.pre("save", async function (next) {
+  if (!this.workshopBookingId) {
+    this.workshopBookingId = this._id as unknown as string;
+  }
+  next();
+});
+
+export const WorkshopBooking: Model<IWorkshopBooking & Document> =
+  mongoose.models.WorkshopBooking ||
+  mongoose.model<IWorkshopBooking & Document>(
+    "WorkshopBooking",
+    WorkshopBookingSchema
+  );
